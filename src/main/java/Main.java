@@ -1,7 +1,7 @@
-import org.opencv.core.*;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
-import org.opencv.videoio.VideoCapture;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import utils.ImageMarker;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -11,11 +11,6 @@ import java.awt.image.WritableRaster;
  * Created by Fomenko_S.V. on 21.07.2017.
  */
 public class Main {
-    static String haarCascadePath = "src/main/resources/haarcascade_frontalface_alt.xml";
-
-    private CascadeClassifier diceCascade = new CascadeClassifier(haarCascadePath);
-    private String output = "src/main/resources/out/output.png";
-    private VideoCapture vc = new VideoCapture();
 
     private DisplayVideoFrame display = new DisplayVideoFrame();
 
@@ -28,29 +23,24 @@ public class Main {
     }
 
     public void detImg() throws InterruptedException {
-        vc.open(0); // Opens the video stream
+        Vision vision = new Vision();
+        ImageMarker marker = new ImageMarker();
 
-        Mat image = new Mat(); // Creates an empty matrix
         while (display.isShowing()){
-            if (!vc.read(image)) {
+            if (!vision.look()) {
                 System.out.println("Error read frame from camera");
                 break;
             }
 
-            MatOfRect diceDetections = new MatOfRect(); // Output container
-            diceCascade.detectMultiScale(image, diceDetections); // Performs the detection
+            MatOfRect diceDetections = vision.detectFaces();
 
-            // Draw a bounding box around each detection.
-            for (Rect rect : diceDetections.toArray()) {
-                Imgproc.rectangle(image, new Point(rect.x, rect.y),
-                        new Point(rect.x + rect.width, rect.y + rect.height),
-                        new Scalar(0, 255, 0));
-            }
+            Mat image = vision.getImage();
+            marker.markRects(image, diceDetections);
 
             display.showImage(matToBufferedImage(image));
         }
 
-        vc.release(); // Closes the stream.
+        vision.realize();
         display.dispose();
 
     }
