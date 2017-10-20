@@ -43,41 +43,73 @@ public class FaceStorageTest extends Assert {
         assertEquals("numbers", 10010, number);
     }
 
+    /**
+     * We add one image into storage by name 'Test' and then
+     * read images with name 'Test'. Expects 1 returned image
+     * that has similar width, height and data matrix with original
+     * image.
+     *
+     * @throws IOException
+     */
     @Test
-    public void store() throws IOException {
+    public void storeAndGetImages() throws IOException {
         FaceStorage faceStorage = new FaceStorage();
+        faceStorage.removeImages("Test");
+        String[] fileNames = faceStorage.getFileNames("Test");
+        assertEquals(fileNames == null ? 0 : fileNames.length, 0);
 
-        Mat mat = new Mat(3, 3, CvType.CV_8U);
+        Mat matRequired = new Mat(3, 3, CvType.CV_8U);
+        matRequired.put(0, 0, data);
+        System.out.println("OpenCV Mat data:\n" + matRequired.dump());
 
-        mat.put(0, 0, data);
+        assertTrue(faceStorage.store("Test", matRequired));
 
-        System.out.println("OpenCV Mat data:\n" + mat.dump());
+        Mat[] matsReceived = faceStorage.getImages("Test");
+        assertEquals(matsReceived.length, 1);
 
-        if ( !faceStorage.store("Test", mat) ) {
-            System.out.println("Can't store mat");
-            fail();
+        Mat matReceived = matsReceived[0];
+        assertEquals(matReceived.width(), matRequired.width());
+        assertEquals(matReceived.height(), matReceived.height());
+
+        byte[] b1 = new byte[1];
+        byte[] b2 = new byte[1];
+        for (int i = 0; i < matRequired.height(); i++) {
+            for (int j = 0; j < matRequired.width(); j++) {
+                matRequired.get(i, j, b1);
+                matReceived.get(i, j, b2);
+
+                assertEquals(b1[0], b2[0]);
+            }
+        }
+
+        faceStorage.removeImages("Test");
+        matRequired.release();
+        for (Mat mat : matsReceived) {
+            mat.release();
         }
     }
 
     @Test
-    public void loadImages() {
+    public void deleteFileByPath() throws IOException {
         FaceStorage faceStorage = new FaceStorage();
+        faceStorage.removeImages("Test");
 
-        Mat[] images = faceStorage.getImages("Test");
-        System.out.println("Images loaded: " + images.length);
-        System.out.println();
-        System.out.println("Images[0] data:\n" + images[0].dump());
-        System.out.println();
+        Mat matRequired = new Mat(3, 3, CvType.CV_8U);
+        matRequired.put(0, 0, data);
 
-        double[] actualData = new double[images[0].height() * images[0].width()];
-        for (int i = 0; i < images[0].rows(); i++) {
-            for (int j = 0; j < images[0].cols(); j++) {
-                actualData[i*3 + j] = images[0].get(i, j)[0];
-            }
-        }
+        faceStorage.store("Test", matRequired);
+        faceStorage.store("Test", matRequired);
+        faceStorage.store("Test", matRequired);
 
-        System.out.println("Actual data length: " + actualData.length);
+        String[] fileNames = faceStorage.getFileNames("Test");
+        assertEquals(3, fileNames == null ? 0 : fileNames.length);
 
-        assertArrayEquals(data, actualData, 0.001);
+        faceStorage.removeImage("Test", fileNames[0]);
+        fileNames = faceStorage.getFileNames("Test");
+        assertEquals(2, fileNames == null ? 0 : fileNames.length);
+
+        faceStorage.removeImages("Test");
+        fileNames = faceStorage.getFileNames("Test");
+        assertEquals(0, fileNames == null ? 0 : fileNames.length);
     }
 }
