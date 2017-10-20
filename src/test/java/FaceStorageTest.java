@@ -5,6 +5,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import utils.FaceStorage;
+import utils.OpenCVLoader;
 
 import java.io.IOException;
 
@@ -18,7 +19,11 @@ public class FaceStorageTest extends Assert {
 
     @Before
     public void init() {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        try {
+            OpenCVLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

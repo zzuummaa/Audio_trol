@@ -4,7 +4,9 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import utils.ImageMarker;
 import utils.ImageProcessor;
+import utils.OpenCVLoader;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,9 +17,8 @@ public class Main {
 
     private DisplayVideoFrame display = new DisplayVideoFrame();
 
-    public static void main(String[] args) throws InterruptedException {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
+    public static void main(String[] args) throws InterruptedException, IOException {
+        OpenCVLoader.load();
         Main main = new Main();
         main.detImg();
 
