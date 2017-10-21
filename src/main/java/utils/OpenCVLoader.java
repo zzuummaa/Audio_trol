@@ -10,7 +10,7 @@ public class OpenCVLoader {
     private static boolean isLoaded;
 
     public static void load() throws IOException {
-        String currDirName = new File( "." ).getCanonicalPath();
+        String currDirName = ResourceLoader.getExecutableDir();
 
         try {
             addDir(currDirName + "/natives");

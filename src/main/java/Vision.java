@@ -3,6 +3,7 @@ import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.videoio.VideoCapture;
+import utils.ResourceLoader;
 
 import java.util.*;
 
@@ -12,14 +13,14 @@ import static java.lang.Math.*;
  * Created by Fomenko_S.V. on 22.07.2017.
  */
 public class Vision {
-    static final String haarCascadePath = "src/main/resources/haarcascade_frontalface_alt.xml";
+    static final String haarCascadeName = "haarcascade_frontalface_alt.xml";
     private CascadeClassifier diceCascade;
 
     private VideoCapture capture;
     private Mat image;
 
     public Vision() {
-        diceCascade = new CascadeClassifier(haarCascadePath);
+        diceCascade = new CascadeClassifier(ResourceLoader.getFullPath(haarCascadeName));
 
         capture = new VideoCapture(0);
 
@@ -29,7 +30,7 @@ public class Vision {
     }
 
     public Vision(String fileName) {
-        diceCascade = new CascadeClassifier(haarCascadePath);
+        diceCascade = new CascadeClassifier(ResourceLoader.getFullPath(haarCascadeName));
 
         capture = new VideoCapture(fileName);
 
