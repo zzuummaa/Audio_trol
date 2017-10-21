@@ -25,7 +25,7 @@ public class Main {
     }
 
     public void detImg() throws InterruptedException {
-        Vision vision = new Vision();
+        Vision vision = new Vision("C:\\Users\\Stephan\\Downloads\\БУХАЮЩИЕ БАБЫ.mp4");
         ImageMarker marker = new ImageMarker();
         ImageProcessor imageProcessor = new ImageProcessor();
 

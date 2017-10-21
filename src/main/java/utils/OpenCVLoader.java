@@ -23,6 +23,7 @@ public class OpenCVLoader {
         }
 
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        System.loadLibrary("opencv_ffmpeg300_64");
     }
 
     public static void addDir(String s) throws IOException {

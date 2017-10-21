@@ -28,6 +28,16 @@ public class Vision {
         }
     }
 
+    public Vision(String fileName) {
+        diceCascade = new CascadeClassifier(haarCascadePath);
+
+        capture = new VideoCapture(fileName);
+
+        if (!capture.isOpened()) {
+            throw new RuntimeException("Can't load video file");
+        }
+    }
+
     public Mat getImage() {
         return image;
     }
