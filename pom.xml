@@ -52,24 +52,40 @@
     </execution>
     </executions>
     </plugin>
-        <plugin>
-            <groupId>com.googlecode.mavennatives</groupId>
-            <artifactId>maven-nativedependencies-plugin</artifactId>
-            <version>0.0.7</version>
-            <executions>
-                <execution>
-                    <id>unpacknatives</id>
-                    <phase>generate-resources</phase>
-                    <goals>
-                        <goal>copy</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
+    <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.0.2</version>
+        <executions>
+            <execution>
+                <id>copy-resources</id>
+                <!-- here the phase you need -->
+                <phase>validate</phase>
+                <goals>
+                    <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                    <outputDirectory>${basedir}/target/natives</outputDirectory>
+                    <resources>
+                        <resource>
+                            <directory>natives</directory>
+                            <filtering>true</filtering>
+                        </resource>
+                    </resources>
+                </configuration>
+            </execution>
+        </executions>
+    </plugin>
     </plugins>
     </build>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -81,12 +97,6 @@
             <groupId>org.javaopencvbook</groupId>
             <artifactId>opencvjar</artifactId>
             <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.javaopencvbook</groupId>
-            <artifactId>opencvjar-runtime</artifactId>
-            <version>3.0.0</version>
-            <classifier>natives-windows-x86_64</classifier>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
