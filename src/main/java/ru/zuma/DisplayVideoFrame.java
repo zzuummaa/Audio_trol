@@ -1,3 +1,5 @@
+package ru.zuma;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -26,7 +28,7 @@ public class DisplayVideoFrame extends JFrame {
     public void paint(Graphics g){
         g = contentPane.getGraphics();
         if (image != null) {
-            g.drawImage(image, 0, 0, this);
+            g.drawImage(image, 0, 0, this.getWidth(), this.getHeight(), this);
         }
     }
 

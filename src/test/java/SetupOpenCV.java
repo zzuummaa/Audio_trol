@@ -1,9 +1,8 @@
 import junit.framework.Assert;
 import org.junit.Test;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import utils.OpenCVLoader;
+import ru.zuma.utils.OpenCVLoader;
 
 import java.io.IOException;
 

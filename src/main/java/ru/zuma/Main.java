@@ -1,9 +1,11 @@
+package ru.zuma;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
-import utils.ImageMarker;
-import utils.ImageProcessor;
-import utils.OpenCVLoader;
+import ru.zuma.utils.ImageMarker;
+import ru.zuma.utils.ImageProcessor;
+import ru.zuma.utils.OpenCVLoader;
 
 import java.io.IOException;
 import java.util.HashMap;

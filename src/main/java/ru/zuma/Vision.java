@@ -1,9 +1,11 @@
+package ru.zuma;
+
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.videoio.VideoCapture;
-import utils.ResourceLoader;
+import ru.zuma.utils.ResourceLoader;
 
 import java.util.*;
 

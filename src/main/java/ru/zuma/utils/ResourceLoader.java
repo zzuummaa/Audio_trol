@@ -1,4 +1,4 @@
-package utils;
+package ru.zuma.utils;
 
 import java.io.File;
 import java.net.URISyntaxException;

@@ -1,4 +1,4 @@
-package utils;
+package ru.zuma.utils;
 
 import org.opencv.core.Core;
 

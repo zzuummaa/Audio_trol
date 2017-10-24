@@ -1,11 +1,10 @@
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import utils.FaceStorage;
-import utils.OpenCVLoader;
+import ru.zuma.utils.FaceStorage;
+import ru.zuma.utils.OpenCVLoader;
 
 import java.io.IOException;
 
