@@ -12,7 +12,7 @@ import static org.opencv.imgproc.Imgproc.putText;
  * Created by Fomenko_S.V. on 22.07.2017.
  */
 public class ImageMarker {
-    public void markRects(Mat image, MatOfRect rects) {
+    public static void markRects(Mat image, MatOfRect rects) {
         // Draw a bounding box around each detection.
         for (Rect rect : rects.toArray()) {
             Imgproc.rectangle(image, new Point(rect.x, rect.y),
@@ -21,7 +21,7 @@ public class ImageMarker {
         }
     }
 
-    public void nameTrackedRects(Mat image, Map<Integer, Rect> rects) {
+    public static void nameTrackedRects(Mat image, Map<Integer, Rect> rects) {
         for (Map.Entry<Integer, Rect> rectEntry: rects.entrySet()) {
             String box_text = "Number: " + rectEntry.getKey();
 

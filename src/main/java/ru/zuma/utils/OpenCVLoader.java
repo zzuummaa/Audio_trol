@@ -5,22 +5,31 @@ import org.opencv.core.Core;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URISyntaxException;
 
 public class OpenCVLoader {
     private static boolean isLoaded;
 
-    public static void load() throws IOException {
-        String currDirName = ResourceLoader.getExecutableDir();
-
+    public static void load(Class clazz) throws IOException {
+        String executableDirName = null;
         try {
-            addDir(currDirName + "/natives");
-        } catch (IOException e) {
+
+            executableDirName = new File( clazz.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI().getPath() ).getParent();
+
+        } catch (URISyntaxException e) {
+            throw new AssertionError(e);
         }
 
         try {
-            addDir(currDirName + "/target/natives");
+            addDir(executableDirName + "/natives");
         } catch (IOException e) {
         }
+
+        /*try {
+            addDir(executableDirName + "/target/natives");
+        } catch (IOException e) {
+        }*/
 
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         System.loadLibrary("opencv_ffmpeg300_64");

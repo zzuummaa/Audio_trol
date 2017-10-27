@@ -19,7 +19,7 @@ public class Main {
     private DisplayVideoFrame display = new DisplayVideoFrame();
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        OpenCVLoader.load();
+        OpenCVLoader.load(Main.class);
         Main main = new Main();
         main.detImg();
 

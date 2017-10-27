@@ -3,6 +3,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import ru.zuma.Main;
 import ru.zuma.utils.FaceStorage;
 import ru.zuma.utils.OpenCVLoader;
 
@@ -19,7 +20,7 @@ public class FaceStorageTest extends Assert {
     @Before
     public void init() {
         try {
-            OpenCVLoader.load();
+            OpenCVLoader.load(Main.class);
         } catch (IOException e) {
             e.printStackTrace();
         }

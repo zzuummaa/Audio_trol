@@ -2,6 +2,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import ru.zuma.Main;
 import ru.zuma.utils.OpenCVLoader;
 
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class SetupOpenCV extends Assert {
     @Test
     public void loadLibrary() {
         try {
-            OpenCVLoader.load();
+            OpenCVLoader.load(Main.class);
         } catch (IOException e) {
             //System.err.println("Try to use VM option '-Djava.library.path=target\\natives'");
             fail();
@@ -24,7 +25,7 @@ public class SetupOpenCV extends Assert {
     @Test
     public void simpleTestLibrary() {
         try {
-            OpenCVLoader.load();
+            OpenCVLoader.load(Main.class);
             Mat mat = new Mat(10, 10, CvType.CV_64FC1);
         } catch (Throwable e) {
             e.printStackTrace();

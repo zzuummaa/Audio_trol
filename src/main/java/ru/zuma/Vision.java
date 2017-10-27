@@ -22,7 +22,7 @@ public class Vision {
     private Mat image;
 
     public Vision() {
-        diceCascade = new CascadeClassifier(ResourceLoader.getFullPath(haarCascadeName));
+        diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
 
         capture = new VideoCapture(0);
 
@@ -32,7 +32,7 @@ public class Vision {
     }
 
     public Vision(String fileName) {
-        diceCascade = new CascadeClassifier(ResourceLoader.getFullPath(haarCascadeName));
+        diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
 
         capture = new VideoCapture(fileName);
 

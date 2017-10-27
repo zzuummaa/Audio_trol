@@ -28,7 +28,11 @@ public class DisplayVideoFrame extends JFrame {
     public void paint(Graphics g){
         g = contentPane.getGraphics();
         if (image != null) {
-            g.drawImage(image, 0, 0, this.getWidth(), this.getHeight(), this);
+            double scaleCoef = this.getWidth() * this.getHeight() / ( image.getWidth() * image.getHeight() );
+            int newWidth = (int)(image.getWidth() * scaleCoef);
+            int newHeight = (int)(this.getHeight() * scaleCoef);
+
+            g.drawImage(image, 0, 0, newWidth, newHeight, this);
         }
     }
 
