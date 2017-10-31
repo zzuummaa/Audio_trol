@@ -1,23 +1,31 @@
 package ru.zuma.utils;
 
-import org.opencv.core.*;
-import org.opencv.imgproc.Imgproc;
-
 import java.util.Map;
 
-import static org.opencv.core.Core.FONT_HERSHEY_PLAIN;
-import static org.opencv.imgproc.Imgproc.putText;
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_imgproc.putText;
+import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
 /**
  * Created by Fomenko_S.V. on 22.07.2017.
  */
 public class ImageMarker {
-    public static void markRects(Mat image, MatOfRect rects) {
+    public static void markRects(Mat image, RectVector rects) {
         // Draw a bounding box around each detection.
-        for (Rect rect : rects.toArray()) {
-            Imgproc.rectangle(image, new Point(rect.x, rect.y),
-                    new Point(rect.x + rect.width, rect.y + rect.height),
-                    new Scalar(0, 255, 0));
+        Point pointLeftBottom = new Point();
+        Point pointRightTop = new Point();
+
+        Rect rect;
+        for (int i = 0; i < rects.size(); i++) {
+            rect = rects.get(i);
+
+            pointLeftBottom.x(rect.x());
+            pointLeftBottom.y(rect.y());
+
+            pointRightTop.x(rect.x() + rect.width());
+            pointRightTop.y(rect.y() + rect.height());
+
+            rectangle(image, pointLeftBottom, pointRightTop, Scalar.GREEN);
         }
     }
 
@@ -29,8 +37,8 @@ public class ImageMarker {
 
             // Calculate the position for annotated text (make sure we don't
             // put illegal values in there):
-            int pos_x = (int) Math.max(face_i.tl().x - 10, 0);
-            int pos_y = (int) Math.max(face_i.tl().y - 10, 0);
+            int pos_x = (int) Math.max(face_i.tl().x() - 10, 0);
+            int pos_y = (int) Math.max(face_i.tl().y() - 10, 0);
 
             putText(image, box_text, new Point(pos_x, pos_y),
                     FONT_HERSHEY_PLAIN, 1.0, new Scalar(0, 255, 0, 2.0));

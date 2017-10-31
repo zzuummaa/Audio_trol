@@ -1,10 +1,12 @@
 package ru.zuma.utils;
 
-import org.opencv.core.Mat;
-import org.opencv.imgcodecs.Imgcodecs;
+import org.bytedeco.javacpp.opencv_core;
 
 import java.io.File;
 import java.io.IOException;
+
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.*;
 
 /**
  * Created by Fomenko_S.V. on 22.07.2017.
@@ -39,7 +41,7 @@ public class FaceStorage  {
         }
 
         String fullFileName = path + "/" + generateFileName(name, maxIndex+1);
-        return Imgcodecs.imwrite(fullFileName, image);
+        return imwrite(fullFileName, image);
     }
 
     public String[] getFileNames(String name) {
@@ -55,7 +57,7 @@ public class FaceStorage  {
 
         Mat[] images = new Mat[fileNames.length];
         for (int i = 0; i < fileNames.length; i++) {
-            images[i] = Imgcodecs.imread(STORAGE_PATH + name + "/" + fileNames[i], Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+            images[i] = imread(STORAGE_PATH + name + "/" + fileNames[i], CV_LOAD_IMAGE_UNCHANGED);
         }
 
         return images;

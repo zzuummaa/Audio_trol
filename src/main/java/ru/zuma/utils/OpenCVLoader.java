@@ -1,7 +1,5 @@
 package ru.zuma.utils;
 
-import org.opencv.core.Core;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -31,7 +29,7 @@ public class OpenCVLoader {
         } catch (IOException e) {
         }*/
 
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        //System.loadLibrary(NATIVE_LIBRARY_NAME);
         System.loadLibrary("opencv_ffmpeg300_64");
     }
 

@@ -1,11 +1,12 @@
 import junit.framework.Assert;
+import org.bytedeco.javacpp.opencv_core;
 import org.junit.Test;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
 import ru.zuma.Main;
 import ru.zuma.utils.OpenCVLoader;
 
 import java.io.IOException;
+
+import static org.bytedeco.javacpp.opencv_core.*;
 
 /**
  * Created by Fomenko_S.V. on 22.07.2017.
@@ -26,7 +27,7 @@ public class SetupOpenCV extends Assert {
     public void simpleTestLibrary() {
         try {
             OpenCVLoader.load(Main.class);
-            Mat mat = new Mat(10, 10, CvType.CV_64FC1);
+            Mat mat = new Mat(10, 10, CV_64FC1);
         } catch (Throwable e) {
             e.printStackTrace();
             fail();

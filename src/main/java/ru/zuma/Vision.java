@@ -1,12 +1,12 @@
 package ru.zuma;
 
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Rect;
-import org.opencv.objdetect.CascadeClassifier;
-import org.opencv.videoio.VideoCapture;
+import org.bytedeco.javacpp.opencv_objdetect;
+import org.bytedeco.javacpp.opencv_videoio;
 import ru.zuma.utils.ResourceLoader;
 
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_videoio.*;
 import java.util.*;
 
 import static java.lang.Math.*;
@@ -18,13 +18,13 @@ public class Vision {
     static final String haarCascadeName = "haarcascade_frontalface_alt.xml";
     private CascadeClassifier diceCascade;
 
-    private VideoCapture capture;
+    private opencv_videoio.VideoCapture capture;
     private Mat image;
 
     public Vision() {
         diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
 
-        capture = new VideoCapture(0);
+        capture = new opencv_videoio.VideoCapture(0);
 
         if (!capture.isOpened()) {
             throw new RuntimeException("Can't open camera");
@@ -52,7 +52,7 @@ public class Vision {
         return capture.read(image);
     }
 
-    public MatOfRect detectFaces() {
+    public RectVector detectFaces() {
         if (image != null) {
             return detectFaces(image);
         } else {
@@ -60,17 +60,17 @@ public class Vision {
         }
     }
 
-    public MatOfRect detectFaces(Mat image) {
-        MatOfRect diceDetections = new MatOfRect();
+    public RectVector detectFaces(Mat image) {
+        RectVector diceDetections = new RectVector();
         diceCascade.detectMultiScale(image, diceDetections); // Performs the detection
 
         return diceDetections;
     }
 
-    private static int MAX_WIDTH_DIFF = 10;
-    private static int MAX_HEIGHT_DIFF = 10;
-    private static int MAX_X_DIFF = 22;
-    private static int MAX_Y_DIFF = 22;
+    private static int MAX_WIDTH_DIFF = 15;
+    private static int MAX_HEIGHT_DIFF = 15;
+    private static int MAX_X_DIFF = 32;
+    private static int MAX_Y_DIFF = 32;
     private static int MAX_SQR_DISTANCE = (int) (pow(MAX_WIDTH_DIFF, 2) + pow(MAX_HEIGHT_DIFF, 2)
                                                + pow(MAX_X_DIFF, 2    ) + pow(MAX_Y_DIFF, 2     ));
 
@@ -87,10 +87,10 @@ public class Vision {
         while (iterator.hasNext()){
             Rect rect = iterator.next();
 
-            int currDistance = (int) (pow(abs(rect.width  - origin.width ), 2)
-                                    + pow(abs(rect.height - origin.height), 2)
-                                    + pow(abs(rect.x      - origin.x     ), 2)
-                                    + pow(abs(rect.y      - origin.y     ), 2));
+            int currDistance = (int) (pow(Math.abs(rect.width()  - origin.width() ), 2)
+                                    + pow(Math.abs(rect.height() - origin.height()), 2)
+                                    + pow(Math.abs(rect.x()      - origin.x()     ), 2)
+                                    + pow(Math.abs(rect.y()      - origin.y()     ), 2));
 
             if (distance > currDistance) {
                 nearest = rect;
@@ -105,7 +105,7 @@ public class Vision {
         }
     }
 
-    public Map<Integer, Rect> trackRects(Map<Integer, Rect> mapOfprevRects, MatOfRect currRects, Mat image) {
+    public Map<Integer, Rect> trackRects(Map<Integer, Rect> mapOfprevRects, RectVector currRects, Mat image) {
         Map<Integer, Rect> mapOfCurrRects = new HashMap<Integer, Rect>();
 
         List<Rect> prevRects = new LinkedList<Rect>();
@@ -121,9 +121,8 @@ public class Vision {
         nextIndex++;
 
         List<Rect> rects = new LinkedList<Rect>();
-        Rect[] rectsArr = currRects.toArray();
-        for (int i = 0; i < rectsArr.length; i++) {
-            rects.add(rectsArr[i]);
+        for (int i = 0; i < currRects.size(); i++) {
+            rects.add(currRects.get(i));
         }
 
         Iterator<Map.Entry<Integer, Rect>> iterator = mapOfprevRects.entrySet().iterator();

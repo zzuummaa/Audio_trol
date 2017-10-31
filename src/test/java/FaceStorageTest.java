@@ -1,29 +1,27 @@
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import ru.zuma.Main;
 import ru.zuma.utils.FaceStorage;
-import ru.zuma.utils.OpenCVLoader;
 
 import java.io.IOException;
+
+import static org.bytedeco.javacpp.opencv_core.*;
 
 /**
  * Created by Fomenko_S.V. on 22.07.2017.
  */
 public class FaceStorageTest extends Assert {
-    static double data[] = {255, 0, 0,
-                            0, 255, 0,
-                            0, 0, 255};
+    static byte data[] = {127, 0, 0,
+                            0, 127, 0,
+                            0, 0, 127};
 
     @Before
     public void init() {
-        try {
+        /*try {
             OpenCVLoader.load(Main.class);
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     @Test
@@ -58,9 +56,9 @@ public class FaceStorageTest extends Assert {
         String[] fileNames = faceStorage.getFileNames("Test");
         assertEquals(fileNames == null ? 0 : fileNames.length, 0);
 
-        Mat matRequired = new Mat(3, 3, CvType.CV_8U);
-        matRequired.put(0, 0, data);
-        System.out.println("OpenCV Mat data:\n" + matRequired.dump());
+        Mat matRequired = new Mat(3, 3, CV_8U);
+        matRequired.data().put(data, 0, 0);
+        System.out.println("OpenCV Mat data:\n" + matRequired);
 
         assertTrue(faceStorage.store("Test", matRequired));
 
@@ -68,15 +66,15 @@ public class FaceStorageTest extends Assert {
         assertEquals(matsReceived.length, 1);
 
         Mat matReceived = matsReceived[0];
-        assertEquals(matReceived.width(), matRequired.width());
-        assertEquals(matReceived.height(), matReceived.height());
+        assertEquals(matReceived.cols(), matRequired.cols());
+        assertEquals(matReceived.rows(), matReceived.rows());
 
         byte[] b1 = new byte[1];
         byte[] b2 = new byte[1];
-        for (int i = 0; i < matRequired.height(); i++) {
-            for (int j = 0; j < matRequired.width(); j++) {
-                matRequired.get(i, j, b1);
-                matReceived.get(i, j, b2);
+        for (int i = 0; i < matRequired.rows(); i++) {
+            for (int j = 0; j < matRequired.cols(); j++) {
+                matRequired.data().get(b1, i, j);
+                matReceived.data().get(b2, i, j);
 
                 assertEquals(b1[0], b2[0]);
             }
@@ -94,8 +92,8 @@ public class FaceStorageTest extends Assert {
         FaceStorage faceStorage = new FaceStorage();
         faceStorage.removeImages("Test");
 
-        Mat matRequired = new Mat(3, 3, CvType.CV_8U);
-        matRequired.put(0, 0, data);
+        Mat matRequired = new Mat(3, 3, CV_8U);
+        matRequired.data().put(data, 0, 0);
 
         faceStorage.store("Test", matRequired);
         faceStorage.store("Test", matRequired);
