@@ -16,11 +16,21 @@ import static org.bytedeco.javacpp.opencv_core.*;
 public class Main {
 
     private CanvasFrame display;
+    private Vision vision;
 
     public static void main(String[] args) throws InterruptedException, IOException {
         //OpenCVLoader.load(Main.class);
 
         Main main = new Main();
+
+        System.out.println("Starting vision...");
+        if (args.length > 0) {
+            main.vision = new Vision(args[0]);
+        } else {
+            main.vision = new Vision();
+        }
+        System.out.println("Vision successfully started!");
+
         main.display = new CanvasFrame("Video frame");
 
         Thread.sleep(100);
@@ -29,7 +39,6 @@ public class Main {
     }
 
     public void detImg() throws InterruptedException {
-        Vision vision = new Vision(/*"C:\\Users\\Stephan\\Downloads\\БУХАЮЩИЕ БАБЫ.mp4"*/);
         ImageMarker marker = new ImageMarker();
         ImageProcessor imageProcessor = new ImageProcessor();
 
@@ -61,6 +70,7 @@ public class Main {
 
         vision.realize();
         display.dispose();
+        System.out.println("Good by!");
 
     }
 

@@ -1,12 +1,16 @@
 package ru.zuma;
 
-import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacpp.opencv_videoio;
 import ru.zuma.utils.ResourceLoader;
+import ru.zuma.video.CameraVideoSource;
+import ru.zuma.video.HttpVideoSource;
+import ru.zuma.video.VideoSourceInterface;
 
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_objdetect.*;
 import static org.bytedeco.javacpp.opencv_videoio.*;
+
+import java.io.IOException;
 import java.util.*;
 
 import static java.lang.Math.*;
@@ -18,28 +22,26 @@ public class Vision {
     static final String haarCascadeName = "haarcascade_frontalface_alt.xml";
     private AsyncClassifier classifier;
 
-    private opencv_videoio.VideoCapture capture;
+    private VideoSourceInterface videoSource;
     private Mat image;
 
-    public Vision() {
-        CascadeClassifier diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
-        classifier = new AsyncClassifier(diceCascade);
-
-        capture = new opencv_videoio.VideoCapture(0);
-
-        if (!capture.isOpened()) {
-            throw new RuntimeException("Can't open camera");
-        }
+    public Vision() throws IOException {
+        this(new CameraVideoSource(0));
     }
 
-    public Vision(String fileName) {
+    public Vision(String url) throws IOException {
+        this(new HttpVideoSource(url));
+    }
+
+    public Vision(VideoSourceInterface videoSource) throws IOException {
+        this.videoSource = videoSource;
+
         CascadeClassifier diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
         classifier = new AsyncClassifier(diceCascade);
 
-        capture = new VideoCapture(fileName);
-
-        if (!capture.isOpened()) {
-            throw new RuntimeException("Can't load video file");
+        if (!videoSource.isOpened()) {
+            realize();
+            throw new IOException("Can't load video source");
         }
     }
 
@@ -52,10 +54,8 @@ public class Vision {
     }
 
     public boolean look() {
-        if (image == null) {
-            image = new Mat();
-        }
-        return capture.read(image);
+        image = videoSource.grab();
+        return image != null;
     }
 
     public RectVector detectFaces() {
@@ -150,7 +150,7 @@ public class Vision {
     }
 
     public void realize() {
-        capture.release();
+        videoSource.release();
         classifier.interrupt();
     }
 }
