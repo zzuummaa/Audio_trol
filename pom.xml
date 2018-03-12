@@ -107,29 +107,6 @@
     </execution>
     </executions>
     </plugin>
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.0.2</version>
-        <executions>
-            <execution>
-                <id>copy-resources</id>
-                <!-- here the phase you need -->
-                <phase>validate</phase>
-                <goals>
-                    <goal>copy-resources</goal>
-                </goals>
-                <configuration>
-                    <outputDirectory>${basedir}/target/natives</outputDirectory>
-                    <resources>
-                        <resource>
-                            <directory>natives</directory>
-                        </resource>
-                    </resources>
-                </configuration>
-            </execution>
-        </executions>
-    </plugin>
 
     <plugin>
         <artifactId>maven-deploy-plugin</artifactId>
@@ -211,6 +188,37 @@
             </execution>
         </executions>
     </plugin>
+
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2.1</version>
+            <executions>
+                <execution>
+                    <id>default-cli</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>ru.zuma.Main</mainClass>
+                        <systemProperties>
+                            <systemProperty>
+                                <key>derby.stream.error.file</key>
+                                <value>${basedir}/target/derby.log</value>
+                            </systemProperty>
+                        </systemProperties>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>1.8</source>
+                <target>1.8</target>
+            </configuration>
+        </plugin>
 
     </plugins>
     </build>

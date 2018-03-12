@@ -1,12 +1,9 @@
 package ru.zuma;
 
-import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacv.CanvasFrame;
 import ru.zuma.utils.ImageMarker;
 import ru.zuma.utils.ImageProcessor;
-import ru.zuma.utils.OpenCVLoader;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,18 +36,23 @@ public class Main {
         Map<Integer, Rect> prevRects = new HashMap<Integer, Rect>();
         Map<Integer, Rect> currRects = null;
 
+        final RectVector[] diceDetections = new RectVector[1];
+        diceDetections[0] = new RectVector();
+        AsyncClassifier classifier = vision.getClassifier();
+        classifier.setOnDetections( (RectVector detections) -> diceDetections[0] = detections );
+
         while (display.isShowing()){
             if (!vision.look()) {
                 System.out.println("Error read frame from camera");
                 break;
             }
 
-            RectVector diceDetections = vision.detectFaces();
+            vision.detectFaces();
 
             Mat image = vision.getImage();
-            marker.markRects(image, diceDetections);
+            marker.markRects(image, diceDetections[0]);
 
-            currRects = vision.trackRects(prevRects, diceDetections, image);
+            currRects = vision.trackRects(prevRects, diceDetections[0], image);
             marker.nameTrackedRects(image, currRects);
             prevRects = currRects;
 

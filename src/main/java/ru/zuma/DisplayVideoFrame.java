@@ -1,6 +1,5 @@
 package ru.zuma;
 
-import javafx.scene.transform.Scale;
 import sun.awt.image.ToolkitImage;
 
 import javax.swing.*;

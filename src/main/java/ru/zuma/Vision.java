@@ -16,13 +16,14 @@ import static java.lang.Math.*;
  */
 public class Vision {
     static final String haarCascadeName = "haarcascade_frontalface_alt.xml";
-    private CascadeClassifier diceCascade;
+    private AsyncClassifier classifier;
 
     private opencv_videoio.VideoCapture capture;
     private Mat image;
 
     public Vision() {
-        diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
+        CascadeClassifier diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
+        classifier = new AsyncClassifier(diceCascade);
 
         capture = new opencv_videoio.VideoCapture(0);
 
@@ -32,13 +33,18 @@ public class Vision {
     }
 
     public Vision(String fileName) {
-        diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
+        CascadeClassifier diceCascade = new CascadeClassifier(ResourceLoader.getInstance().getFullPath(haarCascadeName));
+        classifier = new AsyncClassifier(diceCascade);
 
         capture = new VideoCapture(fileName);
 
         if (!capture.isOpened()) {
             throw new RuntimeException("Can't load video file");
         }
+    }
+
+    public AsyncClassifier getClassifier() {
+        return classifier;
     }
 
     public Mat getImage() {
@@ -61,8 +67,8 @@ public class Vision {
     }
 
     public RectVector detectFaces(Mat image) {
-        RectVector diceDetections = new RectVector();
-        diceCascade.detectMultiScale(image, diceDetections); // Performs the detection
+        classifier.setImage(image);
+        RectVector diceDetections = classifier.getDetections();
 
         return diceDetections;
     }
@@ -145,5 +151,6 @@ public class Vision {
 
     public void realize() {
         capture.release();
+        classifier.interrupt();
     }
 }
