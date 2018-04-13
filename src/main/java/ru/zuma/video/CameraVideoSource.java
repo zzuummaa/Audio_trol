@@ -1,6 +1,5 @@
 package ru.zuma.video;
 
-import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_videoio.VideoCapture;
 
 import static org.bytedeco.javacpp.opencv_core.*;

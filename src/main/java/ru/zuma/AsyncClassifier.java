@@ -24,6 +24,7 @@ public class AsyncClassifier extends Thread {
         this.detections = new RectVector();
         this.imageQueue = new ArrayDeque<Mat>(1);
         this.detectionCallback = null;
+        this.setDaemon(true);
 
         if (isAutoStart) {
             start();
@@ -49,8 +50,23 @@ public class AsyncClassifier extends Thread {
         }
     }
 
+    public final static Size defaultMinSize = new Size(60, 60);
+    public final static Size defaultMaxSize = new Size(1800, 1800);
+
     public void detect(Mat image, RectVector detections) {
-        classifier.detectMultiScale(image, detections); // Performs the detection
+        detect(image, detections, defaultMinSize, defaultMaxSize);
+    }
+
+    public void detect(Mat image, RectVector detections, Size minSize, Size maxSize) {
+        classifier.detectMultiScale(
+                image,
+                detections,
+                1.1,
+                3,
+                0,
+                minSize,
+                maxSize
+        ); // Performs the detection
     }
 
     @Override
