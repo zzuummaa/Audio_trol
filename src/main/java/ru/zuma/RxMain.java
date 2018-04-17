@@ -1,12 +1,12 @@
 package ru.zuma;
 
-import io.reactivex.schedulers.Schedulers;
-import org.bytedeco.javacpp.opencv_core;
+import io.reactivex.Observable;
+import javafx.util.Pair;
 import org.bytedeco.javacpp.opencv_core.RectVector;
-import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacv.CanvasFrame;
 import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoSource;
+import ru.zuma.rx.RxVideoSource2;
 import ru.zuma.utils.ImageMarker;
 import ru.zuma.utils.ImageProcessor;
 import ru.zuma.utils.OpenCVHelper;
@@ -14,8 +14,9 @@ import ru.zuma.video.CameraVideoSource;
 import ru.zuma.video.HttpVideoSource;
 import ru.zuma.video.VideoSourceInterface;
 
-import java.awt.image.BufferedImage;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
@@ -23,22 +24,21 @@ import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_objdetect.*;
 
 public class RxMain {
-    RxVideoSource videoSource;
+    RxVideoSource2 videoSource;
     RxClassifier classifier;
     CanvasFrame canvasFrame;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         RxMain rxMain = new RxMain();
 
         rxMain.initVideoSource(args);
         rxMain.initClassifier();
         rxMain.canvasFrame = new CanvasFrame("Reactive OpenCV sample");
+        rxMain.canvasFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         rxMain.run();
     }
 
-    public void run() {
-        canvasFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
+    public void run() throws InterruptedException {
         AtomicReference<RectVector> detections = new AtomicReference<>(new RectVector());
 
         AtomicReference<Mat> img = new AtomicReference<>();
@@ -46,7 +46,7 @@ public class RxMain {
         long[] lastTime = new long[1];
         long timeout = 100;
 
-        videoSource.subject
+        videoSource
                 .filter((mat) -> {
                     long currTime = System.currentTimeMillis();
                     if (currTime - lastTime[0] < timeout) {
@@ -58,67 +58,29 @@ public class RxMain {
                 })
                 .subscribe(classifier);
 
-        videoSource.subject.subscribe( (image) -> {
+        videoSource.subscribe( (image) -> {
 
-            Mat imgTmp = image.clone();
             if (img.get() == null) {
                 img.set(image.clone());
+                synchronized (img) {
+                    img.notify();
+                }
             }
 
         } );
 
         classifier.subject.subscribe( (detect) -> detections.set(detect) );
 
-        Thread thread = new Thread(() -> {
-            while (true) {
-                Mat tmpImg;
-
-                synchronized (videoSource) {
-
-                    if (videoSource.subject.hasComplete()) {
-                        break;
-                    }
-
-                    tmpImg = videoSource.grab();
-
-                }
-
-                videoSource.onNext(tmpImg);
-            }
-
+        Observable.combineLatest(
+                videoSource, classifier.subject,
+                (image, detects) -> new Pair<Mat, RectVector>(image, detects)
+        ).subscribe(pair -> {
+                ImageMarker.markRects(pair.getKey(), pair.getValue());
+                canvasFrame.showImage(ImageProcessor.toBufferedImage(pair.getKey()));
         });
-        thread.start();
 
-        RectVector currDetections = null;
-        Mat currImage = null;
-
-        while (canvasFrame.isShowing()) {
-            RectVector localDetections = detections.get();
-            Mat localImage = img.getAndSet(null);
-
-            if (localImage == null) {
-                continue;
-            }
-
-            if (currDetections != localDetections ||
-                currImage != localImage) {
-
-                currDetections = localDetections;
-                currImage = localImage;
-
-                ImageMarker.markRects(localImage, currDetections);
-
-                canvasFrame.showImage(ImageProcessor.toBufferedImage(localImage));
-                localImage.release();
-            }
-
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                break;
-            }
-        }
+        // Idle before app exit signal
+        while (canvasFrame.isShowing()) Thread.sleep(100);
 
         System.out.println("Realise resources...");
 
@@ -132,6 +94,7 @@ public class RxMain {
     public void initClassifier() {
         CascadeClassifier diceCascade = OpenCVHelper.createFaceDetector();
         classifier = new RxClassifier(diceCascade);
+        //classifier.setDefaultMinSize(new Size(0, 0));
     }
 
     public void initVideoSource(String[] args) {
@@ -151,6 +114,6 @@ public class RxMain {
         }
         System.out.println("Video source successfully started!");
 
-        videoSource = new RxVideoSource(videoSourceTmp);
+        videoSource = new RxVideoSource2(videoSourceTmp);
     }
 }
