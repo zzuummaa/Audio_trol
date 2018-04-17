@@ -6,13 +6,16 @@ import static org.bytedeco.javacpp.opencv_core.*;
 
 public class CameraVideoSource implements VideoSourceInterface {
     private VideoCapture capture;
+    private Mat img;
 
     public CameraVideoSource(int index) {
         capture = new VideoCapture(index);
+        img = new Mat();
     }
 
     public CameraVideoSource(VideoCapture capture) {
         this.capture = capture;
+        this.img = new Mat();
     }
 
     @Override
@@ -22,7 +25,6 @@ public class CameraVideoSource implements VideoSourceInterface {
 
     @Override
     public Mat grab() {
-        Mat img = new Mat();
         capture.read(img);
         return img;
     }

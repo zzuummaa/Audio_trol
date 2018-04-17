@@ -1,5 +1,6 @@
 package ru.zuma;
 
+import io.reactivex.schedulers.Schedulers;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.RectVector;
 import org.bytedeco.javacpp.opencv_objdetect;
@@ -13,6 +14,8 @@ import ru.zuma.video.CameraVideoSource;
 import ru.zuma.video.HttpVideoSource;
 import ru.zuma.video.VideoSourceInterface;
 
+import java.awt.image.BufferedImage;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
@@ -36,11 +39,33 @@ public class RxMain {
     public void run() {
         canvasFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        AtomicReference<RectVector> detections = new AtomicReference<>();
+        AtomicReference<RectVector> detections = new AtomicReference<>(new RectVector());
+
         AtomicReference<Mat> img = new AtomicReference<>();
 
-        videoSource.subscribe(classifier);
-        videoSource.subject.subscribe( (image) -> img.set(image) );
+        long[] lastTime = new long[1];
+        long timeout = 100;
+
+        videoSource.subject
+                .filter((mat) -> {
+                    long currTime = System.currentTimeMillis();
+                    if (currTime - lastTime[0] < timeout) {
+                        return false;
+                    } else {
+                        lastTime[0] = currTime;
+                        return true;
+                    }
+                })
+                .subscribe(classifier);
+
+        videoSource.subject.subscribe( (image) -> {
+
+            Mat imgTmp = image.clone();
+            if (img.get() == null) {
+                img.set(image.clone());
+            }
+
+        } );
 
         classifier.subject.subscribe( (detect) -> detections.set(detect) );
 
@@ -69,7 +94,11 @@ public class RxMain {
 
         while (canvasFrame.isShowing()) {
             RectVector localDetections = detections.get();
-            Mat localImage = img.get();
+            Mat localImage = img.getAndSet(null);
+
+            if (localImage == null) {
+                continue;
+            }
 
             if (currDetections != localDetections ||
                 currImage != localImage) {
@@ -77,10 +106,10 @@ public class RxMain {
                 currDetections = localDetections;
                 currImage = localImage;
 
-                Mat markedImg = currImage.clone();
-                ImageMarker.markRects(markedImg, currDetections);
+                ImageMarker.markRects(localImage, currDetections);
 
-                canvasFrame.showImage(ImageProcessor.toBufferedImage(markedImg));
+                canvasFrame.showImage(ImageProcessor.toBufferedImage(localImage));
+                localImage.release();
             }
 
             try {
