@@ -1,6 +1,7 @@
 package ru.zuma.rx;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.PublishSubject;
@@ -12,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RxVideoSource2 extends Observable<Mat> implements Observer<Mat> {
 
-    private Subject<Mat> subject;
+    public Subject<Mat> subject;
     private VideoSourceInterface videoSource;
     private Thread thread;
     private AtomicBoolean isComplete;

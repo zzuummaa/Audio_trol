@@ -29,6 +29,19 @@ public class ImageMarker {
         }
     }
 
+    public static void markRect2d(Mat image, Rect2d rect) {
+        Point pointLeftBottom = new Point();
+        Point pointRightTop = new Point();
+
+        pointLeftBottom.x((int) rect.x());
+        pointLeftBottom.y((int) rect.y());
+
+        pointRightTop.x((int) (rect.x() + rect.width()));
+        pointRightTop.y((int) (rect.y() + rect.height()));
+
+        rectangle(image, pointLeftBottom, pointRightTop, Scalar.GREEN);
+    }
+
     public static void nameTrackedRects(Mat image, Map<Integer, Rect> rects) {
         for (Map.Entry<Integer, Rect> rectEntry: rects.entrySet()) {
             String box_text = "Number: " + rectEntry.getKey();
