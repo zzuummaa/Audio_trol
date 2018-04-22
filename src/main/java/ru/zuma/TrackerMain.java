@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
@@ -21,7 +22,7 @@ import static org.bytedeco.javacpp.opencv_tracking.*;
 
 public class TrackerMain {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         CanvasFrame canvasFrame = new CanvasFrame("Reactive OpenCV sample");
         canvasFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -30,19 +31,21 @@ public class TrackerMain {
         Mat frame = videoSource.take(2000).blockingFirst();
         canvasFrame.showImage(ImageProcessor.toBufferedImage(frame));
 
-        Rect2d bbox = getSelectedRect(canvasFrame);
+        Rect2d bbox = requestSelectedRect(canvasFrame);
 
-        Tracker tracker = TrackerBoosting.create();
+        ImageMarker.markRect2d(frame, bbox);
+        canvasFrame.showImage(ImageProcessor.toBufferedImage(frame));
+
+        Tracker tracker = TrackerCSRT.create();
         tracker.init(frame, bbox);
 
         Observable<Rect2d> trackerObservable = videoSource.map((image) -> {
             Rect2d rect2d = new Rect2d(bbox);
             if (!tracker.update(image, rect2d)) {
-                System.out.println("Tracking failure");
+                //System.out.println("Tracking failure");
             }
             return rect2d;
         });
-        trackerObservable.subscribe();
 
         Observable.combineLatest(
                 videoSource, trackerObservable,
@@ -66,7 +69,7 @@ public class TrackerMain {
         System.out.println("Good bye!");
     }
 
-    private static Rect2d  getSelectedRect(CanvasFrame canvasFrame) throws InterruptedException {
+    public static Rect2d requestSelectedRect(CanvasFrame canvasFrame) throws InterruptedException {
         GetRectMouseListener ml = new GetRectMouseListener();
 
         canvasFrame.getCanvas().addMouseListener(ml);
@@ -78,7 +81,25 @@ public class TrackerMain {
         Rectangle r = new Rectangle(new Point(ml.x1, ml.y1));
         r.add(new Point(ml.x2, ml.y2));
 
-        return new Rect2d(r.x, r.y, r.width, r.height);
+        // (x1, y1) should be left bottom!
+        if (ml.x1 > ml.x2) {
+            int tmp = ml.x1;
+            ml.x1 = ml.x2;
+            ml.x2 = tmp;
+        }
+        if (ml.y1 > ml.y2) {
+            int tmp = ml.x2;
+            ml.x2 = ml.x1;
+            ml.x1 = tmp;
+        }
+
+        Rect2d rect2d = new Rect2d(
+                ml.x1,
+                ml.y1,
+                ml.x2 - ml.x1,
+                ml.y2 - ml.y1);
+
+        return rect2d;
     }
 
     static class GetRectMouseListener implements MouseListener {
@@ -101,7 +122,7 @@ public class TrackerMain {
         @Override
         public void mouseReleased(MouseEvent e) {
             if (isReceivedXY.get()) return;
-            x2 = e.getY();
+            x2 = e.getX();
             y2 = e.getY();
             if (Math.abs(x1 - x2) > 40 && Math.abs(y1 - y2) > 40) {
                 isReceivedXY.set(true);
