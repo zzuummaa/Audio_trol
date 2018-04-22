@@ -28,23 +28,18 @@ public class TrackerMain {
 
         RxVideoSource2 videoSource = ConsoleUtil.createVideoSource(args);
 
-        Mat frame = videoSource.take(2000).blockingFirst();
+        Mat frame = videoSource.take(2000).blockingFirst().clone();
         canvasFrame.showImage(ImageProcessor.toBufferedImage(frame));
 
-        Rect2d bbox = requestSelectedRect(canvasFrame);
-
-        ImageMarker.markRect2d(frame, bbox);
-        canvasFrame.showImage(ImageProcessor.toBufferedImage(frame));
-
+        Rect2d initBbox = new Rect2d();
+        Rect2d bbox = new Rect2d(initBbox);
         Tracker tracker = TrackerCSRT.create();
-        tracker.init(frame, bbox);
 
         Observable<Rect2d> trackerObservable = videoSource.map((image) -> {
-            Rect2d rect2d = new Rect2d(bbox);
-            if (!tracker.update(image, rect2d)) {
+            if (!tracker.update(image, bbox)) {
                 //System.out.println("Tracking failure");
             }
-            return rect2d;
+            return bbox;
         });
 
         Observable.combineLatest(
@@ -54,6 +49,14 @@ public class TrackerMain {
             ImageMarker.markRect2d(pair.getKey(), pair.getValue());
             canvasFrame.showImage(ImageProcessor.toBufferedImage(pair.getKey()));
         });
+
+        initBbox = requestSelectedRect(canvasFrame);
+
+        ImageMarker.markRect2d(frame, initBbox);
+        canvasFrame.showImage(ImageProcessor.toBufferedImage(frame));
+
+        tracker.init(frame, initBbox);
+        frame.release();
 
         // Idle before app exit signal
         while (canvasFrame.isShowing()) {
