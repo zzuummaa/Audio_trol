@@ -1,9 +1,11 @@
 package ru.zuma;
 
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import javafx.util.Pair;
 import org.bytedeco.javacpp.opencv_tracking.Tracker;
 import org.bytedeco.javacv.CanvasFrame;
+import ru.zuma.rx.RxTracker;
 import ru.zuma.rx.RxVideoSource2;
 import ru.zuma.utils.ConsoleUtil;
 import ru.zuma.utils.ImageMarker;
@@ -28,35 +30,31 @@ public class TrackerMain {
 
         RxVideoSource2 videoSource = ConsoleUtil.createVideoSource(args);
 
-        Mat frame = videoSource.take(2000).blockingFirst().clone();
-        canvasFrame.showImage(ImageProcessor.toBufferedImage(frame));
-
-        Rect2d initBbox = new Rect2d();
-        Rect2d bbox = new Rect2d(initBbox);
-        Tracker tracker = TrackerTLD.create();
-
-        initBbox = requestSelectedRect(canvasFrame);
-
-        Observable<Rect2d> trackerObservable = videoSource.map((image) -> {
-            if (!tracker.update(image, bbox)) {
-                //System.out.println("Tracking failure");
+        Mat[] frame = new Mat[] {new Mat()};
+        Disposable disposable = videoSource.subscribe((img) -> {
+            canvasFrame.showImage(ImageProcessor.toBufferedImage(img));
+            synchronized (frame) {
+                frame[0].release();
+                frame[0] = img.clone();
             }
-            return bbox;
         });
 
+        Rect2d initBbox = requestSelectedRect(canvasFrame);
+        disposable.dispose();
+
+        RxTracker tracker = new RxTracker(TrackerTLD.create());
+        synchronized (frame) {
+            tracker.init(frame[0], initBbox);
+        }
+        videoSource.subscribe(tracker);
+
         Observable.combineLatest(
-                videoSource, trackerObservable,
+                videoSource, tracker,
                 (image, track) -> new Pair<Mat, Rect2d>(image, track)
         ).subscribe(pair -> {
             ImageMarker.markRect2d(pair.getKey(), pair.getValue());
             canvasFrame.showImage(ImageProcessor.toBufferedImage(pair.getKey()));
         });
-
-        ImageMarker.markRect2d(frame, initBbox);
-        canvasFrame.showImage(ImageProcessor.toBufferedImage(frame));
-
-        tracker.init(frame, initBbox);
-        frame.release();
 
         // Idle before app exit signal
         while (canvasFrame.isShowing()) {
