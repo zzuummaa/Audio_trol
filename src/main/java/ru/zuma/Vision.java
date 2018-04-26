@@ -1,6 +1,6 @@
 package ru.zuma;
 
-import org.bytedeco.javacpp.opencv_videoio;
+import ru.zuma.classifier.AsyncClassifier;
 import ru.zuma.utils.ResourceLoader;
 import ru.zuma.video.CameraVideoSource;
 import ru.zuma.video.HttpVideoSource;
@@ -8,7 +8,6 @@ import ru.zuma.video.VideoSourceInterface;
 
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_videoio.*;
 
 import java.io.IOException;
 import java.util.*;

@@ -10,7 +10,7 @@ import ru.zuma.utils.ConsoleUtil;
 import ru.zuma.utils.ImageMarker;
 import ru.zuma.utils.ImageProcessor;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.TimeUnit;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static org.bytedeco.javacpp.opencv_core.*;
@@ -32,23 +32,12 @@ public class RxMain {
 
     public void run() throws InterruptedException {
 
-        long[] lastTime = new long[1];
-        long timeout = 100;
-
         videoSource
-                .filter((mat) -> {
-                    long currTime = System.currentTimeMillis();
-                    if (currTime - lastTime[0] < timeout) {
-                        return false;
-                    } else {
-                        lastTime[0] = currTime;
-                        return true;
-                    }
-                })
+                .throttleFirst(100, TimeUnit.MILLISECONDS)
                 .subscribe(classifier);
 
         Observable.combineLatest(
-                videoSource, classifier.subject,
+                videoSource, classifier,
                 (image, detects) -> new Pair<Mat, RectVector>(image, detects)
         ).subscribe(pair -> {
                 ImageMarker.markRects(pair.getKey(), pair.getValue());

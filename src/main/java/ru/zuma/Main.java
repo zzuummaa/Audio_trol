@@ -1,6 +1,7 @@
 package ru.zuma;
 
 import org.bytedeco.javacv.CanvasFrame;
+import ru.zuma.classifier.AsyncClassifier;
 import ru.zuma.utils.ImageMarker;
 import ru.zuma.utils.ImageProcessor;
 

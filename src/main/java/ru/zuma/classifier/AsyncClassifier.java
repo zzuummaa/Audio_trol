@@ -1,4 +1,4 @@
-package ru.zuma;
+package ru.zuma.classifier;
 
 import java.util.ArrayDeque;
 
@@ -6,7 +6,8 @@ import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_objdetect.*;
 
 public class AsyncClassifier extends Thread {
-    interface DetectionCallback {
+    @FunctionalInterface
+    public interface DetectionCallback {
         void onDetections(RectVector detections);
     }
 

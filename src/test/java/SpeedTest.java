@@ -1,10 +1,8 @@
-import org.bytedeco.javacpp.opencv_core;
 import org.junit.Before;
-import org.junit.Assert;
 
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import org.junit.Test;
-import ru.zuma.AsyncClassifier;
+import ru.zuma.classifier.AsyncClassifier;
 import ru.zuma.utils.ResourceLoader;
 import ru.zuma.video.CameraVideoSource;
 import ru.zuma.video.VideoSourceInterface;

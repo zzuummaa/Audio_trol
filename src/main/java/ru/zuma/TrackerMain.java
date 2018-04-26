@@ -33,7 +33,9 @@ public class TrackerMain {
 
         Rect2d initBbox = new Rect2d();
         Rect2d bbox = new Rect2d(initBbox);
-        Tracker tracker = TrackerCSRT.create();
+        Tracker tracker = TrackerTLD.create();
+
+        initBbox = requestSelectedRect(canvasFrame);
 
         Observable<Rect2d> trackerObservable = videoSource.map((image) -> {
             if (!tracker.update(image, bbox)) {
@@ -49,8 +51,6 @@ public class TrackerMain {
             ImageMarker.markRect2d(pair.getKey(), pair.getValue());
             canvasFrame.showImage(ImageProcessor.toBufferedImage(pair.getKey()));
         });
-
-        initBbox = requestSelectedRect(canvasFrame);
 
         ImageMarker.markRect2d(frame, initBbox);
         canvasFrame.showImage(ImageProcessor.toBufferedImage(frame));
