@@ -63,6 +63,7 @@ public class RxVideoSource2 extends Observable<Mat> implements Observer<Mat> {
 
     @Override
     public void onComplete() {
+        videoSource.release();
         isComplete.set(true);
         subject.onComplete();
     }

@@ -1,13 +1,37 @@
 package ru.zuma.utils;
 
+import org.bytedeco.javacpp.avcodec;
+import org.bytedeco.javacpp.avutil;
 import org.bytedeco.javacpp.opencv_objdetect;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
 import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoSource2;
-import ru.zuma.video.CameraVideoSource;
-import ru.zuma.video.HttpVideoSource;
-import ru.zuma.video.VideoSourceInterface;
+import ru.zuma.video.*;
 
 public class ConsoleUtil {
+    public static VideoConsumer createVideoConsumer(String[] args) {
+        VideoConsumer consumer;
+        FFmpegFrameRecorder recorder;
+
+        System.out.println("Starting video consumer...");
+        if (args.length > 1) {
+            recorder = new FFmpegFrameRecorder(args[2], 640, 480, 0);
+        } else {
+            recorder = new FFmpegFrameRecorder("http://localhost:8090/feed.ffm", 640, 480, 0);
+        }
+
+        recorder.setInterleaved(true);
+        recorder.setVideoBitrate(4000);
+        recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+        recorder.setFormat("ffm");
+        recorder.setFrameRate(30);
+
+        consumer = new VideoConsumer(recorder);
+
+        return consumer;
+    }
+
     public static RxVideoSource2 createVideoSource(String[] args) {
         VideoSourceInterface videoSourceTmp;
 
