@@ -17,12 +17,11 @@ public class ConsoleUtil {
         if (args.length > 1) {
             recorder = new FFmpegFrameRecorder(args[2], 640, 480, 0);
         } else {
-            recorder = new FFmpegFrameRecorder("http://localhost:8090/feed.ffm", 640, 480, 0);
+            recorder = new FFmpegFrameRecorder("http://192.168.1.68:8090/feed.ffm", 640, 480, 0);
         }
 
         recorder.setInterleaved(true);
-        recorder.setVideoBitrate(4000);
-        recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+        recorder.setVideoBitrate(200);
         recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
         recorder.setFormat("ffm");
         recorder.setFrameRate(30);

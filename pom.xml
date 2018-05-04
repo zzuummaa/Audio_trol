@@ -65,7 +65,7 @@
                 <manifest>
                     <addClasspath>true</addClasspath>
                     <classpathPrefix>lib/</classpathPrefix>
-                    <mainClass>ru.zuma.Main</mainClass>
+                    <mainClass>ru.zuma.LiveStreamProcessing</mainClass>
                 </manifest>
             </archive>
         </configuration>
@@ -200,7 +200,8 @@
                     <goal>java</goal>
                 </goals>
                 <configuration>
-                    <mainClass>ru.zuma.RxMain</mainClass>
+                    <mainClass>ru.zuma.LiveStreamProcessing</mainClass>
+                    <commandlineArgs>http://localhost:8090/test.flv</commandlineArgs>
                     <systemProperties>
                         <systemProperty>
                             <key>derby.stream.error.file</key>
