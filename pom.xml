@@ -201,7 +201,7 @@
                 </goals>
                 <configuration>
                     <mainClass>ru.zuma.LiveStreamProcessing</mainClass>
-                    <commandlineArgs>http://localhost:8090/test.flv</commandlineArgs>
+                    <commandlineArgs>http://192.168.1.68:8090:8090/test.flv</commandlineArgs>
                     <systemProperties>
                         <systemProperty>
                             <key>derby.stream.error.file</key>

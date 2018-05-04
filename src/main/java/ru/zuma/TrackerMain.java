@@ -3,7 +3,6 @@ package ru.zuma;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import javafx.util.Pair;
-import org.bytedeco.javacpp.opencv_tracking.Tracker;
 import org.bytedeco.javacv.CanvasFrame;
 import ru.zuma.rx.RxTracker;
 import ru.zuma.rx.RxVideoSource2;

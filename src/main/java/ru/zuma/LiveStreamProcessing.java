@@ -2,8 +2,6 @@ package ru.zuma;
 
 import io.reactivex.Observable;
 import javafx.util.Pair;
-import org.bytedeco.javacpp.opencv_core;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
 import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoConsumer;
 import ru.zuma.rx.RxVideoSource2;
