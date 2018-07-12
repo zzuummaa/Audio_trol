@@ -3,7 +3,6 @@ package ru.zuma;
 import io.reactivex.Observable;
 import javafx.util.Pair;
 
-import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacv.CanvasFrame;
 import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoSource2;
@@ -19,12 +18,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static org.bytedeco.javacpp.opencv_core.*;
-import static org.opencv.imgproc.Imgproc.resize;
+import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class RxClassifierMain {
     RxVideoSource2 videoSource;
     RxClassifier classifier;
     CanvasFrame canvasFrame;
+    String faceStorageName;
 
     public static void main(String[] args) throws InterruptedException {
         RxClassifierMain rxClassifierMain = new RxClassifierMain();
@@ -33,6 +33,7 @@ public class RxClassifierMain {
         rxClassifierMain.classifier = ConsoleUtil.createClassifier();
         rxClassifierMain.canvasFrame = new CanvasFrame("Reactive OpenCV sample");
         rxClassifierMain.canvasFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        rxClassifierMain.faceStorageName = ConsoleUtil.storageName(args);
         rxClassifierMain.run();
     }
 
@@ -53,7 +54,7 @@ public class RxClassifierMain {
 
         AtomicBoolean isClicked = new AtomicBoolean(false);
         canvasFrame.getCanvas().addMouseListener(new ClickMouseListener(isClicked));
-        FaceStorage faceStorage = new FaceStorage();
+        FaceStorage faceStorage = new FaceStorage("%s%d%s");
         subscribeFaceSaver(observable, faceStorage, isClicked);
 
         // Idle before app exit signal
@@ -73,7 +74,8 @@ public class RxClassifierMain {
             if (isSaving.get()) {
                 if (!pair.getValue().empty()) {
                     Mat face = matFromCenter(pair.getKey(), pair.getValue().get(0), 128, 128);
-                    String fileName = faceStorage.store("Test", face);
+                    String fileName = faceStorage.store(faceStorageName, face);
+                    face.release();
                     if (fileName != null) {
                         System.out.println("Photo saved as '" + fileName + "'");
                     } else {
@@ -107,9 +109,9 @@ public class RxClassifierMain {
 
         Mat notResMat = new Mat(mat, notResRect);
         Mat resMat = new Mat();
-        //resize(notResMat, resMat, new Size(width, height));
+        resize(notResMat, resMat, new Size(width, height));
 
-        return null;
+        return resMat;
     }
 
     static class ClickMouseListener implements MouseListener {

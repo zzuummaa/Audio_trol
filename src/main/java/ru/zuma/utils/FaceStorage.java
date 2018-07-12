@@ -18,7 +18,20 @@ public class FaceStorage  {
     private static final String EXTENSION = ".png";
     private static final int DIGIT_COUNT = 6;
 
+    /**
+     * Format of saving file name. Input data consists 3 arguments:
+     * - simple name of directory
+     * - number of data in directory
+     * - extension of file
+     */
+    private String fileNameFormat;
+
     public FaceStorage() {
+        this("%s%06d%s");
+    }
+
+    public FaceStorage(String fileNameFormat) {
+        this.fileNameFormat = fileNameFormat;
     }
 
     public String store(String name, Mat image) throws IOException {
@@ -55,9 +68,13 @@ public class FaceStorage  {
         return contents;
     }
 
+    public File[] getFiles(String name) {
+        String path = STORAGE_PATH + name;
+        return new File(path).listFiles();
+    }
+
     public Mat[] getImages(String name, int flags) {
         String[] fileNames = getFileNames(name);
-
         Mat[] images = new Mat[fileNames.length];
         for (int i = 0; i < fileNames.length; i++) {
             images[i] = imread(STORAGE_PATH + name + "/" + fileNames[i], flags);
@@ -71,12 +88,17 @@ public class FaceStorage  {
     }
 
     public String generateFileName(String name, int num) {
-        return String.format("%s%06d%s", name, num, EXTENSION);
+        return String.format(fileNameFormat, name, num, EXTENSION);
     }
 
     public int getNumber(String fileName) {
-        int startIndex = fileName.length() - (DIGIT_COUNT + EXTENSION.length());
-        int endIndex = startIndex + DIGIT_COUNT;
+        int endIndex = fileName.length() - EXTENSION.length();
+        int startIndex = endIndex;
+        while (Character.isDigit(fileName.charAt(startIndex-1))) {
+            startIndex--;
+            if (startIndex-1 < 0) throw new NumberFormatException("Before extension should be numbers");
+        }
+
         return Integer.parseInt(fileName.substring(startIndex, endIndex));
     }
 

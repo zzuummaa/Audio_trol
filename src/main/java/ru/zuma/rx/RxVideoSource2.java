@@ -38,7 +38,10 @@ public class RxVideoSource2 extends Observable<Mat> implements Observer<Mat> {
             while (!isComplete.get()) {
 
                 Mat image = videoSource.grab();
-                subject.onNext(image);
+                if (image != null) {
+                    subject.onNext(image);
+                }
+
 
             }
 

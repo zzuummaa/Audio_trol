@@ -73,9 +73,20 @@ public class ConsoleUtil {
 
         RxClassifier classifier = new RxClassifier(diceCascade);
         classifier.setDefaultMinSize(new Size(90, 90));
-        classifier.setDefaultMaxSize(new Size(320, 320));
+        classifier.setDefaultMaxSize(new Size(480, 480));
         return classifier;
         //classifier.setDefaultMinSize(new Size(0, 0));
+    }
+
+    public static String storageName(String[] args) {
+        String name = null;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-n")) {
+                name = i+1 < args.length ? args[i+1] : "Test";
+            }
+        }
+
+        return name;
     }
 
 }
