@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
+import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_UNCHANGED;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
+import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 
 /**
  * Created by Fomenko_S.V. on 22.07.2017.
@@ -19,7 +21,7 @@ public class FaceStorage  {
     public FaceStorage() {
     }
 
-    public boolean store(String name, Mat image) throws IOException {
+    public String store(String name, Mat image) throws IOException {
         String path = STORAGE_PATH + name;
 
         File directory = new File(path);
@@ -41,7 +43,8 @@ public class FaceStorage  {
         }
 
         String fullFileName = path + "/" + generateFileName(name, maxIndex+1);
-        return imwrite(fullFileName, image);
+
+        return imwrite(fullFileName, image) ? fullFileName : null;
     }
 
     public String[] getFileNames(String name) {
@@ -52,15 +55,19 @@ public class FaceStorage  {
         return contents;
     }
 
-    public Mat[] getImages(String name) {
+    public Mat[] getImages(String name, int flags) {
         String[] fileNames = getFileNames(name);
 
         Mat[] images = new Mat[fileNames.length];
         for (int i = 0; i < fileNames.length; i++) {
-            images[i] = imread(STORAGE_PATH + name + "/" + fileNames[i], CV_LOAD_IMAGE_UNCHANGED);
+            images[i] = imread(STORAGE_PATH + name + "/" + fileNames[i], flags);
         }
 
         return images;
+    }
+
+    public Mat[] getImages(String name) {
+        return getImages(name, CV_LOAD_IMAGE_UNCHANGED);
     }
 
     public String generateFileName(String name, int num) {

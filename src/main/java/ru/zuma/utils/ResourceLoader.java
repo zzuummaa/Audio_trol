@@ -29,13 +29,13 @@ public class ResourceLoader {
         executablePath = new File( clazz.getProtectionDomain()
                 .getCodeSource().getLocation().toURI().getPath() ).getParent();
 
-        resourcesPath = executablePath + "\\" + resourcesFolderName;
+        resourcesPath = executablePath + File.separator + resourcesFolderName;
 
         resourceLoader = new ResourceLoader();
     }
 
     public String getFullPath(String resourceName) {
-        return resourcesPath + "\\" + resourceName;
+        return resourcesPath + File.separator + resourceName;
     }
 
     public String getExecutableDir() {

@@ -60,7 +60,7 @@ public class FaceStorageTest extends Assert {
         matRequired.data().put(data, 0, 0);
         System.out.println("OpenCV Mat data:\n" + matRequired);
 
-        assertTrue(faceStorage.store("Test", matRequired));
+        assertNotNull(faceStorage.store("Test", matRequired));
 
         Mat[] matsReceived = faceStorage.getImages("Test");
         assertEquals(matsReceived.length, 1);
