@@ -2,7 +2,6 @@ package ru.zuma;
 
 import io.reactivex.Observable;
 import javafx.util.Pair;
-
 import org.bytedeco.javacv.CanvasFrame;
 import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoSource2;
@@ -11,10 +10,13 @@ import ru.zuma.utils.FaceStorage;
 import ru.zuma.utils.ImageMarker;
 import ru.zuma.utils.ImageProcessor;
 
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static org.bytedeco.javacpp.opencv_core.*;
@@ -52,10 +54,10 @@ public class RxClassifierMain {
             canvasFrame.showImage(ImageProcessor.toBufferedImage(pair.getKey()));
         });
 
-        AtomicBoolean isClicked = new AtomicBoolean(false);
-        canvasFrame.getCanvas().addMouseListener(new ClickMouseListener(isClicked));
+        AtomicReference<Optional<Point>> point = new AtomicReference<>(Optional.empty());
+        canvasFrame.getCanvas().addMouseListener(new ClickMouseListener(point));
         FaceStorage faceStorage = new FaceStorage("%s%d%s");
-        subscribeFaceSaver(observable, faceStorage, isClicked);
+        subscribeFaceSaver(observable, faceStorage, point);
 
         // Idle before app exit signal
         while (canvasFrame.isShowing()) Thread.sleep(100);
@@ -69,12 +71,31 @@ public class RxClassifierMain {
         System.out.println("Good bye!");
     }
 
-    private void subscribeFaceSaver(Observable<Pair<Mat, RectVector>> classifier, FaceStorage faceStorage, AtomicBoolean isSaving) {
+    private void subscribeFaceSaver(Observable<Pair<Mat, RectVector>> classifier, FaceStorage faceStorage, AtomicReference<Optional<Point>> point) {
         classifier.subscribe(pair -> {
-            if (isSaving.get()) {
+            point.getAndSet(Optional.empty()).ifPresent(p -> {
                 if (!pair.getValue().empty()) {
-                    Mat face = matFromCenter(pair.getKey(), pair.getValue().get(0), 128, 128);
-                    String fileName = faceStorage.store(faceStorageName, face);
+
+                    // Search for clicked rect
+                    Rect r = null;
+                    int i;
+                    for (i = 0; i < pair.getValue().size(); i++) {
+                        r = pair.getValue().get(i);
+                        if (r.x() <= p.x && p.x <= r.x() + r.width()
+                        &&  r.y() <= p.y && p.y <= r.y() + r.height()) {
+                            break;
+                        }
+                    }
+
+                    if (i == pair.getValue().size()) return;
+
+                    Mat face = matFromCenter(pair.getKey(), r, 128, 128);
+                    String fileName = null;
+                    try {
+                        fileName = faceStorage.store(faceStorageName, face);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     face.release();
                     if (fileName != null) {
                         System.out.println("Photo saved as '" + fileName + "'");
@@ -82,8 +103,7 @@ public class RxClassifierMain {
                         System.out.println("Error when photo save");
                     }
                 }
-                isSaving.set(false);
-            }
+            });
         });
     }
 
@@ -92,14 +112,14 @@ public class RxClassifierMain {
         double notResWidth = rect.width();
         double notResHeight = rect.height();
 
-        if ((double) notResWidth / notResHeight > prop) {
+        if (notResWidth / notResHeight > prop) {
             notResHeight = notResWidth / prop;
         } else {
             notResWidth = notResHeight * prop;
         }
 
-        int xCenter = (int) (rect.x() + rect.width() / 2);
-        int yCenter = (int) (rect.y() + rect.height() / 2);
+        int xCenter = rect.x() + rect.width() / 2;
+        int yCenter = rect.y() + rect.height() / 2;
         Rect notResRect = new Rect(
                 (int)(xCenter - notResWidth / 2),
                 (int)(yCenter - notResHeight / 2),
@@ -115,15 +135,16 @@ public class RxClassifierMain {
     }
 
     static class ClickMouseListener implements MouseListener {
-        private AtomicBoolean isClicked;
+        private AtomicReference<Optional<Point>> point;
 
-        public ClickMouseListener(AtomicBoolean isClicked) {
-            this.isClicked = isClicked;
+        public ClickMouseListener(AtomicReference<Optional<Point>> point) {
+            this.point = point;
         }
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            isClicked.set(true);
+            Point clickPoint = new Point(e.getX(), e.getY());
+            point.set(Optional.of(clickPoint));
         }
 
         @Override

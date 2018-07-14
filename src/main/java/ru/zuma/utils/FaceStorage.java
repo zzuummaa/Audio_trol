@@ -91,6 +91,11 @@ public class FaceStorage  {
         return String.format(fileNameFormat, name, num, EXTENSION);
     }
 
+    @Deprecated
+    public String generateFullFileName(String name, int num, String extension) {
+        return STORAGE_PATH + "/" + String.format(fileNameFormat, name, num, extension);
+    }
+
     public int getNumber(String fileName) {
         int endIndex = fileName.length() - EXTENSION.length();
         int startIndex = endIndex;
