@@ -68,7 +68,7 @@ public class RxClassifierMain {
             videoSource.onComplete();
         }
 
-        System.out.println("Good bye!");
+        System.out.println("Goodbye!");
     }
 
     private void subscribeFaceSaver(Observable<Pair<Mat, RectVector>> classifier, FaceStorage faceStorage, AtomicReference<Optional<Point>> point) {

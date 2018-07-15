@@ -1,17 +1,11 @@
 package ru.zuma;
 
-import io.reactivex.Observable;
-import javafx.util.Pair;
-import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacv.CanvasFrame;
-import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoSource2;
 import ru.zuma.utils.ConsoleUtil;
-import ru.zuma.utils.ImageMarker;
 import ru.zuma.utils.ImageProcessor;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 

@@ -40,6 +40,11 @@ public class RxVideoSource implements VideoSourceInterface, ObservableSource<Mat
     }
 
     @Override
+    public double getFrameRate() {
+        return videoSource.getFrameRate();
+    }
+
+    @Override
     public void subscribe(Observer<? super Mat> observer) {
         subject.subscribe(observer);
     }

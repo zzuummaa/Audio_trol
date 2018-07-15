@@ -10,6 +10,8 @@ public interface VideoSourceInterface extends AutoCloseable {
 
     void release();
 
+    double getFrameRate();
+
     @Override
     default void close() {
         release();

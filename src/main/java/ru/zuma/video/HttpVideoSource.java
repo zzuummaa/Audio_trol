@@ -7,7 +7,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import static org.bytedeco.javacpp.opencv_core.*;
 
 public class HttpVideoSource implements VideoSourceInterface {
-    OpenCVFrameConverter.ToMat toMat = new OpenCVFrameConverter.ToMat();
+    private OpenCVFrameConverter.ToMat toMat = new OpenCVFrameConverter.ToMat();
     private FFmpegFrameGrabber grabber;
     private boolean isOpened;
 
@@ -49,5 +49,10 @@ public class HttpVideoSource implements VideoSourceInterface {
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public double getFrameRate() {
+        return grabber.getFrameRate();
     }
 }
