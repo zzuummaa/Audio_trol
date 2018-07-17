@@ -35,13 +35,17 @@ public class RxVideoSource2 extends Observable<Mat> implements Observer<Mat> {
         @Override
         public void run() {
 
+            long lastNotNullTime = System.currentTimeMillis();
             while (!isComplete.get()) {
-
                 Mat image = videoSource.grab();
                 if (image != null) {
                     subject.onNext(image);
+                    lastNotNullTime = System.currentTimeMillis();
+                } else if (System.currentTimeMillis() - lastNotNullTime > 5000) {
+                    System.err.println(getClass().getName() + ": frame stream is end");
+                    subject.onComplete();
+                    break;
                 }
-
 
             }
 
@@ -75,4 +79,7 @@ public class RxVideoSource2 extends Observable<Mat> implements Observer<Mat> {
         subject.subscribe(observer);
     }
 
+    public double getFrameRate() {
+        return videoSource.getFrameRate();
+    }
 }
