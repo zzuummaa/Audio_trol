@@ -7,6 +7,7 @@ import ru.zuma.rx.RxVideoConsumer;
 import ru.zuma.rx.RxVideoSource2;
 import ru.zuma.utils.ConsoleUtil;
 import ru.zuma.utils.ImageMarker;
+import ru.zuma.utils.Pair;
 
 import java.util.concurrent.TimeUnit;
 
@@ -39,12 +40,12 @@ public class LiveStreamProcessing {
 
         Observable<Pair<Mat, RectVector>> observable = Observable.combineLatest(
                 videoSource, classifier,
-                (image, detects) -> new Pair<>(image, detects)
+                Pair::new
         );
 
         observable.map( (pair) -> {
-            ImageMarker.markRects(pair.getKey(), pair.getValue());
-            return pair.getKey();
+            ImageMarker.markRects(pair.first(), pair.second());
+            return pair.first();
         }).subscribe(consumer);
     }
 }

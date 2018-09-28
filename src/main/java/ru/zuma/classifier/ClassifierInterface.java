@@ -1,7 +1,5 @@
 package ru.zuma.classifier;
 
-import org.bytedeco.javacpp.opencv_core;
-
 import static org.bytedeco.javacpp.opencv_core.*;
 
 public interface ClassifierInterface {

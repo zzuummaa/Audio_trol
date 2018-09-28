@@ -13,7 +13,11 @@ public class HttpVideoSource implements VideoSourceInterface {
 
     public HttpVideoSource(String url) {
         this(new FFmpegFrameGrabber(url));
+    }
 
+    public HttpVideoSource(String url, int timeout) {
+        this(new FFmpegFrameGrabber(url));
+        System.err.println(getClass().getName() + " warning: constructor parameter 'timeout' is not used");
     }
 
     public HttpVideoSource(FFmpegFrameGrabber grabber) {
