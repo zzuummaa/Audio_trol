@@ -2,6 +2,7 @@ package ru.zuma.utils;
 
 import org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 
+// TODO merge this class with OpenCVLoader
 public class OpenCVHelper {
     static String haarCascadeName = "haarcascade_frontalface_alt.xml";
 

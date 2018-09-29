@@ -1,14 +1,10 @@
 package ru.zuma;
 
 import io.reactivex.Observable;
-import javafx.util.Pair;
 import org.bytedeco.javacv.CanvasFrame;
 import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoSource2;
-import ru.zuma.utils.ConsoleUtil;
-import ru.zuma.utils.FaceStorage;
-import ru.zuma.utils.ImageMarker;
-import ru.zuma.utils.ImageProcessor;
+import ru.zuma.utils.*;
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -20,44 +16,53 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class RxClassifierMain {
     RxVideoSource2 videoSource;
     RxClassifier classifier;
+    Observable<Pair<Mat, RectVector>> classifierPairObserver;
     CanvasFrame canvasFrame;
     String faceStorageName;
 
-    public static void main(String[] args) throws InterruptedException {
-        RxClassifierMain rxClassifierMain = new RxClassifierMain();
+    public RxClassifierMain(String[] args) {
+        this.videoSource = ConsoleUtil.createVideoSource(args);
+        this.classifier = ConsoleUtil.createClassifier();
+        this.canvasFrame = new CanvasFrame("Reactive OpenCV sample");
+        this.canvasFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.faceStorageName = ConsoleUtil.storageName(args);
+    }
 
-        rxClassifierMain.videoSource = ConsoleUtil.createVideoSource(args);
-        rxClassifierMain.classifier = ConsoleUtil.createClassifier();
-        rxClassifierMain.canvasFrame = new CanvasFrame("Reactive OpenCV sample");
-        rxClassifierMain.canvasFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        rxClassifierMain.faceStorageName = ConsoleUtil.storageName(args);
+    public static void main(String[] args) throws InterruptedException {
+        RxClassifierMain rxClassifierMain = new RxClassifierMain(args);
+        rxClassifierMain.init(true);
+
+        rxClassifierMain.classifierPairObserver.subscribe(pair -> {
+            ImageMarker.markRects(pair.first(), pair.second());
+            rxClassifierMain.canvasFrame.showImage(ImageProcessor.toBufferedImage(pair.first()));
+        });
+
         rxClassifierMain.run();
     }
 
-    public void run() throws InterruptedException {
-
+    public void init(boolean isSaveFaces) {
         videoSource
-                .throttleFirst(100, TimeUnit.MILLISECONDS)
-                .subscribe(classifier);
+            .throttleFirst(100, TimeUnit.MILLISECONDS)
+            .subscribe(classifier);
 
-        Observable<Pair<Mat, RectVector>> observable = Observable.combineLatest(
-                videoSource, classifier,
-                (image, detects) -> new Pair<Mat, RectVector>(image, detects)
+        classifierPairObserver = Observable.combineLatest(
+            videoSource, classifier,
+            Pair::new
         );
-        observable.subscribe(pair -> {
-            ImageMarker.markRects(pair.getKey(), pair.getValue());
-            canvasFrame.showImage(ImageProcessor.toBufferedImage(pair.getKey()));
-        });
 
-        AtomicReference<Optional<Point>> point = new AtomicReference<>(Optional.empty());
-        canvasFrame.getCanvas().addMouseListener(new ClickMouseListener(point));
-        FaceStorage faceStorage = new FaceStorage("%s%d%s");
-        subscribeFaceSaver(observable, faceStorage, point);
+        if (isSaveFaces) {
+            AtomicReference<Optional<Point>> point = new AtomicReference<>(Optional.empty());
+            canvasFrame.getCanvas().addMouseListener(new ClickMouseListener(point));
+            FaceStorage faceStorage = new FaceStorage("%s%d%s");
+            subscribeFaceSaver(classifierPairObserver, faceStorage, point);
+        }
+    }
+
+    public void run() throws InterruptedException {
 
         // Idle before app exit signal
         while (canvasFrame.isShowing()) Thread.sleep(100);
@@ -74,22 +79,22 @@ public class RxClassifierMain {
     private void subscribeFaceSaver(Observable<Pair<Mat, RectVector>> classifier, FaceStorage faceStorage, AtomicReference<Optional<Point>> point) {
         classifier.subscribe(pair -> {
             point.getAndSet(Optional.empty()).ifPresent(p -> {
-                if (!pair.getValue().empty()) {
+                if (!pair.second().empty()) {
 
                     // Search for clicked rect
                     Rect r = null;
                     int i;
-                    for (i = 0; i < pair.getValue().size(); i++) {
-                        r = pair.getValue().get(i);
+                    for (i = 0; i < pair.second().size(); i++) {
+                        r = pair.second().get(i);
                         if (r.x() <= p.x && p.x <= r.x() + r.width()
                         &&  r.y() <= p.y && p.y <= r.y() + r.height()) {
                             break;
                         }
                     }
 
-                    if (i == pair.getValue().size()) return;
+                    if (i == pair.second().size()) return;
 
-                    Mat face = matFromCenter(pair.getKey(), r, 128, 128);
+                    Mat face = ImageProcessor.resizedSubImage(pair.first(), r, 128, 128);
                     String fileName = null;
                     try {
                         fileName = faceStorage.store(faceStorageName, face);
@@ -105,33 +110,6 @@ public class RxClassifierMain {
                 }
             });
         });
-    }
-
-    private Mat matFromCenter(Mat mat, Rect rect, int width, int height) {
-        double prop = (double) width / height;
-        double notResWidth = rect.width();
-        double notResHeight = rect.height();
-
-        if (notResWidth / notResHeight > prop) {
-            notResHeight = notResWidth / prop;
-        } else {
-            notResWidth = notResHeight * prop;
-        }
-
-        int xCenter = rect.x() + rect.width() / 2;
-        int yCenter = rect.y() + rect.height() / 2;
-        Rect notResRect = new Rect(
-                (int)(xCenter - notResWidth / 2),
-                (int)(yCenter - notResHeight / 2),
-                (int)notResWidth,
-                (int)notResHeight
-        );
-
-        Mat notResMat = new Mat(mat, notResRect);
-        Mat resMat = new Mat();
-        resize(notResMat, resMat, new Size(width, height));
-
-        return resMat;
     }
 
     static class ClickMouseListener implements MouseListener {

@@ -30,6 +30,7 @@ public class FaceStorage  {
         this("%s%06d%s");
     }
 
+    @Deprecated
     public FaceStorage(String fileNameFormat) {
         this.fileNameFormat = fileNameFormat;
     }

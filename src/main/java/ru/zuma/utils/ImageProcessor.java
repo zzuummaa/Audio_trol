@@ -1,13 +1,15 @@
 package ru.zuma.utils;
 
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 
-import static org.bytedeco.javacpp.opencv_core.*;
-
 import java.awt.image.BufferedImage;
+
+import static org.bytedeco.javacpp.opencv_core.*;
+import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
+import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
+import static org.bytedeco.javacpp.opencv_imgproc.resize;
 
 public class ImageProcessor {
 
@@ -91,4 +93,36 @@ public class ImageProcessor {
 		return biConv.convert(src);
 	}
 
+	public static Mat resizedSubImage(Mat mat, Rect rect, int width, int height) {
+		double prop = (double) width / height;
+		double notResWidth = rect.width();
+		double notResHeight = rect.height();
+
+		if (notResWidth / notResHeight > prop) {
+			notResHeight = notResWidth / prop;
+		} else {
+			notResWidth = notResHeight * prop;
+		}
+
+		int xCenter = rect.x() + rect.width() / 2;
+		int yCenter = rect.y() + rect.height() / 2;
+		Rect notResRect = new Rect(
+				(int)(xCenter - notResWidth / 2),
+				(int)(yCenter - notResHeight / 2),
+				(int)notResWidth,
+				(int)notResHeight
+		);
+
+		Mat notResMat = new Mat(mat, notResRect);
+		Mat resMat = new Mat();
+		resize(notResMat, resMat, new Size(width, height));
+
+		return resMat;
+	}
+
+	public static Mat toGrayScale(Mat imageRGB) {
+		Mat grayImage = new Mat();
+		cvtColor(imageRGB, grayImage, CV_BGR2GRAY);
+		return grayImage;
+	}
 }

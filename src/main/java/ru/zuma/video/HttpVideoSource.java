@@ -23,6 +23,8 @@ public class HttpVideoSource implements VideoSourceInterface {
     public HttpVideoSource(FFmpegFrameGrabber grabber) {
         this.grabber = grabber;
         try {
+            // For rtsp waiting forever situation
+            grabber.setOption("stimeout" , "10000000");
             grabber.start();
             isOpened = true;
         } catch (FrameGrabber.Exception e) {
