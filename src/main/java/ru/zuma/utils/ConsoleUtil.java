@@ -8,6 +8,8 @@ import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoSource2;
 import ru.zuma.video.*;
 
+import java.io.IOException;
+
 import static org.bytedeco.javacpp.opencv_core.*;
 import static org.bytedeco.javacpp.opencv_objdetect.*;
 
@@ -68,7 +70,7 @@ public class ConsoleUtil {
         return new RxVideoSource2(videoSourceTmp);
     }
 
-    public static RxClassifier createClassifier() {
+    public static RxClassifier createClassifier() throws IOException {
         CascadeClassifier diceCascade = OpenCVHelper.createFaceDetector();
 
         RxClassifier classifier = new RxClassifier(diceCascade);

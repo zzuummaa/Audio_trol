@@ -24,7 +24,7 @@ public class RxClassifierMain {
     CanvasFrame canvasFrame;
     String faceStorageName;
 
-    public RxClassifierMain(String[] args) {
+    public RxClassifierMain(String[] args) throws IOException {
         this.videoSource = ConsoleUtil.createVideoSource(args);
         this.classifier = ConsoleUtil.createClassifier();
         this.canvasFrame = new CanvasFrame("Reactive OpenCV sample");
@@ -32,7 +32,7 @@ public class RxClassifierMain {
         this.faceStorageName = ConsoleUtil.storageName(args);
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         RxClassifierMain rxClassifierMain = new RxClassifierMain(args);
         rxClassifierMain.init(true);
 

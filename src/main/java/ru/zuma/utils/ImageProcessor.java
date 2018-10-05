@@ -7,9 +7,7 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import java.awt.image.BufferedImage;
 
 import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
-import static org.bytedeco.javacpp.opencv_imgproc.resize;
+import static org.bytedeco.javacpp.opencv_imgproc.*;
 
 public class ImageProcessor {
 
