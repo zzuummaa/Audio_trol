@@ -1,6 +1,7 @@
 package ru.zuma.utils;
 
 import java.io.File;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 public class ResourceLoader {
@@ -15,23 +16,21 @@ public class ResourceLoader {
 
     public static ResourceLoader getInstance() {
         if (resourceLoader == null) {
-            try {
-                configureFromClass(ResourceLoader.class);
-            } catch (URISyntaxException e) {
-                throw new AssertionError(e);
-            }
+            configureFromClass(ResourceLoader.class);
         }
 
         return resourceLoader;
     }
 
-    public static void configureFromClass(Class clazz) throws URISyntaxException {
-        executablePath = new File( clazz.getProtectionDomain()
-                .getCodeSource().getLocation().toURI().getPath() ).getParent();
-
-        resourcesPath = executablePath + File.separator + resourcesFolderName;
-
-        resourceLoader = new ResourceLoader();
+    public static void configureFromClass(Class clazz) {
+        try {
+            URI uri = clazz.getProtectionDomain().getCodeSource().getLocation().toURI();
+            executablePath = new File(uri.getPath()).getParent();
+            resourcesPath = executablePath + File.separator + resourcesFolderName;
+            resourceLoader = new ResourceLoader();
+        } catch (URISyntaxException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public String getFullPath(String resourceName) {
