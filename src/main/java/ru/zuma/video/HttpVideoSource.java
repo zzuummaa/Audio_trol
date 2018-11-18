@@ -8,7 +8,7 @@ import static org.bytedeco.javacpp.opencv_core.*;
 
 public class HttpVideoSource implements VideoSourceInterface {
     private OpenCVFrameConverter.ToMat toMat = new OpenCVFrameConverter.ToMat();
-    private FFmpegFrameGrabber grabber;
+    private FrameGrabber grabber;
     private boolean isOpened;
 
     public HttpVideoSource(String url) {
@@ -20,7 +20,7 @@ public class HttpVideoSource implements VideoSourceInterface {
         System.err.println(getClass().getName() + " warning: constructor parameter 'timeout' is not used");
     }
 
-    public HttpVideoSource(FFmpegFrameGrabber grabber) {
+    public HttpVideoSource(FrameGrabber grabber) {
         this.grabber = grabber;
         try {
             // For rtsp waiting forever situation

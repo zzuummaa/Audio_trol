@@ -1,17 +1,21 @@
 package ru.zuma.utils;
 
 import org.bytedeco.javacpp.avcodec;
-import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.OpenCVFrameGrabber;
 import ru.zuma.rx.RxClassifier;
 import ru.zuma.rx.RxVideoSource2;
-import ru.zuma.video.*;
+import ru.zuma.video.CameraVideoSource;
+import ru.zuma.video.HttpVideoSource;
+import ru.zuma.video.VideoConsumer;
+import ru.zuma.video.VideoSourceInterface;
 
 import java.io.IOException;
 
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
+import static org.bytedeco.javacpp.opencv_core.Size;
+import static org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 
 public class ConsoleUtil {
     public static VideoConsumer createVideoConsumer(String[] args) {
@@ -45,7 +49,8 @@ public class ConsoleUtil {
 
         System.out.println("Starting video source...");
 
-        String videoSourceURL = null;
+        String videoSourceURL = System.getProperty("os.name").equals("Linux") ? "/dev/video0" : null;
+        String pixelFormat = null;
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-i")) {
                 videoSourceURL = i+1 < args.length ? args[i+1] : null;
@@ -53,9 +58,17 @@ public class ConsoleUtil {
             }
         }
 
+        FrameGrabber grabber;
         if (videoSourceURL != null) {
-            FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoSourceURL);
-            videoSourceTmp = new HttpVideoSource(grabber);
+            if (videoSourceURL.startsWith("http") | videoSourceURL.startsWith("rtsp") | videoSourceURL.startsWith("rtmp")) {
+                grabber = new FFmpegFrameGrabber(videoSourceURL);
+                videoSourceTmp = new HttpVideoSource(grabber);
+            } else {
+                grabber = new OpenCVFrameGrabber(videoSourceURL);
+                grabber.setFormat("MJPEG");
+                grabber.setFrameRate(15);
+                videoSourceTmp = new CameraVideoSource(grabber);
+            }
         } else {
             videoSourceTmp = new CameraVideoSource(0);
         }

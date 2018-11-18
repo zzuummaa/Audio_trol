@@ -8,14 +8,18 @@ import static org.bytedeco.javacpp.opencv_core.Mat;
 
 public class CameraVideoSource implements VideoSourceInterface {
     private OpenCVFrameConverter.ToMat toMat = new OpenCVFrameConverter.ToMat();
-    private OpenCVFrameGrabber grabber;
+    private FrameGrabber grabber;
     private boolean isOpened;
     private boolean isClosed;
 
     public CameraVideoSource(int index) {
-        grabber = new OpenCVFrameGrabber(index);
+        this(new OpenCVFrameGrabber(index));
+    }
+
+    public CameraVideoSource(FrameGrabber grabber) {
+        this.grabber = grabber;
         try {
-            grabber.start();
+            this.grabber.start();
             isOpened = true;
         } catch (FrameGrabber.Exception e) {
             e.printStackTrace();
@@ -23,7 +27,7 @@ public class CameraVideoSource implements VideoSourceInterface {
         }
     }
 
-//    public CameraVideoSource(VideoCapture capture) {
+    //    public CameraVideoSource(VideoCapture capture) {
 //        this.capture = capture;
 //        this.img = new Mat();
 //    }
